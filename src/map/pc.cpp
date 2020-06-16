@@ -1908,6 +1908,14 @@ void pc_reg_received(struct map_session_data *sd)
 	}
 
 	channel_autojoin(sd);
+
+	// Restore IM_CHAR instance to the player
+	for (const auto &instance : instances) {
+		if (instance.second->mode == IM_CHAR && instance.second->owner_id == sd->status.char_id) {
+			sd->instance_id = instance.first;
+			break;
+		}
+	}
 }
 
 static int pc_calc_skillpoint(struct map_session_data* sd)
@@ -6030,9 +6038,6 @@ enum e_setpos pc_setpos(struct map_session_data* sd, unsigned short mapindex, in
 		clif_changemap(sd,m,x,y); // [MouseJstr]
 	} else if(sd->state.active) //Tag player for rewarping after map-loading is done. [Skotlex]
 		sd->state.rewarp = 1;
-
-	if (sc && sc->data[SC_HELLS_PLANT])
-		skill_unit_move_unit_group(skill_id2group(sc->data[SC_HELLS_PLANT]->val4), m, x - sd->bl.x, y - sd->bl.y);
 
 	sd->mapindex = mapindex;
 	sd->bl.m = m;
